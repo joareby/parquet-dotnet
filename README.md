@@ -1,4 +1,7 @@
-﻿# Apache Parquet for .Net Platform
+Fork from: https://github.com/aloneguid/parquet-dotnet
+
+
+# Apache Parquet for .Net Platform
 
 ![Icon](doc/img/banner.svg)
 
