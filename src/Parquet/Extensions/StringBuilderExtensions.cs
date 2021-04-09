@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Text;
+using System.Globalization;
 using Parquet.Data;
 using Parquet.Data.Rows;
 using Parquet.Serialization;
@@ -114,7 +115,12 @@ namespace Parquet.Extensions
       {
          if (value == null) return;
 
-         sb.Append(value.ToString());
+         var ci = CultureInfo.InvariantCulture;
+         sb.Append(value switch {
+            float f => f.ToString(ci),
+            double d => d.ToString(ci),
+            _ => value.ToString()
+         });
       }
 
       private static void EncodeJson(StringBuilder sb, StringFormat sf, object value)
@@ -146,7 +152,12 @@ namespace Parquet.Extensions
          }
          else
          {
-            sb.Append(value.ToString());
+            var ci = CultureInfo.InvariantCulture;
+            sb.Append(value switch {
+               float f => f.ToString(ci),
+               double d => d.ToString(ci),
+               _ => value.ToString()
+            });
          }
       }
    }
