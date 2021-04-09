@@ -81,5 +81,25 @@ namespace Parquet.Test
             }
          }
       }
+
+      [Fact]
+      public void AmazonWebServices_CostAndUsageReports() {
+         string[] iliids = new string[] {
+            "2pjdt2wydwy4avxxkkt47ezbqeqz7yvszta3clfz6xufxcksscrq",
+            "kis3kg4pvuwftwpgay7swjwgilgqhy3qykq34hb5dj4bvbkowyia",
+            "kis3kg4pvuwftwpgay7swjwgilgqhy3qykq34hb5dj4bvbkowyia"
+         };
+         foreach (int i in Enumerable.Range(0, 3))
+         {
+            using Stream s = OpenTestFile($"aws-cur-sample-2018-{10 + i}.parquet");
+            using var r = new ParquetReader(s);
+            DataColumn[] columns = r.ReadEntireRowGroup();
+            DataColumn identity_line_item_id_col = columns.FirstOrDefault(x => x.Field.Name == "identity_line_item_id");
+            Assert.NotNull(identity_line_item_id_col);
+
+            string iliid = (string)identity_line_item_id_col.Data.GetValue(0);
+            Assert.Equal(iliids[i], iliid);
+         }
+      }
    }
 }

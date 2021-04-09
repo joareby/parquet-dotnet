@@ -35,5 +35,18 @@ namespace Parquet
 
          return $"[n: {se.Name}, t: {t}, ct: {ct}, rt: {rt}, c: {se.Num_children}]";
       }
+
+      public static Thrift.DataPageHeader ToV1(this Thrift.DataPageHeaderV2 ph)
+      {
+         return new Thrift.DataPageHeader
+         {
+            Num_values = ph.Num_values,
+            Encoding = ph.Encoding,
+            //Definition_level_encoding
+            //Repetition_level_encoding
+            Statistics = ph.Statistics,
+            __isset = new Thrift.DataPageHeader.Isset { statistics = ph.__isset.statistics }
+         };
+      }
    }
 }

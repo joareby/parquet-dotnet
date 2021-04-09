@@ -207,13 +207,15 @@ namespace Parquet.File
                      cd.definitionsOffset += ReadLevels(reader, _maxDefinitionLevel, cd.definitions, cd.definitionsOffset, ph.Data_page_header.Num_values);
                   }
 
-                  if (ph.Data_page_header == null) throw new ParquetException($"column '{_dataField.Path}' is missing data page header, file is corrupt");
+                  Thrift.DataPageHeader dph = ph.Data_page_header ?? ph.Data_page_header_v2.ToV1();
+
+                  if (dph == null) throw new ParquetException($"column '{_dataField.Path}' is missing data page header, file is corrupt");
 
                   // if statistics are defined, use null count to determine the exact number of items we should read
                   // however, I don't know if all parquet files with null values have stats defined. Maybe a better solution would
                   // be using a count of defined values (from reading definitions?) 
-                  int maxReadCount = ph.Data_page_header.Num_values - (int)(ph.Data_page_header.Statistics?.Null_count ?? 0);
-                  ReadColumn(reader, ph.Data_page_header.Encoding, maxValues, maxReadCount, cd);
+                  int maxReadCount = dph.Num_values - (int)(dph.Statistics?.Null_count ?? 0);
+                  ReadColumn(reader, dph.Encoding, maxValues, maxReadCount, cd);
                }
             }
          }
@@ -249,6 +251,7 @@ namespace Parquet.File
                break;
 
             case Thrift.Encoding.PLAIN_DICTIONARY:
+            case Thrift.Encoding.RLE_DICTIONARY:
                if (cd.indexes == null) cd.indexes = new int[(int)totalValues];
                indexCount = ReadPlainDictionary(reader, maxReadCount, cd.indexes, 0);
                _dataTypeHandler.MergeDictionary(cd.dictionary, cd.indexes, cd.values, cd.valuesOffset, indexCount);
